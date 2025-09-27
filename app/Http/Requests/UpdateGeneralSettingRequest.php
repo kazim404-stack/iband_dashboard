@@ -23,7 +23,7 @@ class UpdateGeneralSettingRequest extends FormRequest
     {
         return [
             'site_name' => 'required|string|max:255',
-            'logo' => 'required|image|mimes:jpg,jpeg,png,svg,webp|max:2048',
+            'logo' => 'image|mimes:jpg,jpeg,png,svg,webp|max:2048',
             'facebook' => 'nullable|url',
             'instagram' => 'nullable|url',
             'whatsapp' => 'nullable|string|max:255',

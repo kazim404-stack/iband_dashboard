@@ -17,8 +17,12 @@ class Contact extends Model
         "is_primary"
     ];
     public $translatable = ['address', 'state'];
-    public function generalSetting(){
+    public function generalSetting()
+    {
         return $this->belongsTo(GeneralSetting::class);
     }
-
+    public function phones()
+    {
+        return $this->hasMany(Phone::class);
+    }
 }

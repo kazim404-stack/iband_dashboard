@@ -2,12 +2,15 @@
 
 use App\Http\Controllers\backend\ContactController;
 use App\Http\Controllers\backend\GeneralSettingController;
+use App\Http\Controllers\backend\PhoneController;
+use App\Http\Controllers\backend\SliderController;
+use App\Http\Controllers\backend\SliderImageController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('admin.layouts.admin_master');
-});
+    return view('admin.dashboard.dashboard');
+})->name('da');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -24,6 +27,10 @@ Route::get('/dashboard', function () {
 Route::prefix('admin')->as('admin.')->group(function () {
     Route::resource('general-settings', GeneralSettingController::class);
     Route::resource('contacts', ContactController::class);
+    Route::resource('phones',PhoneController::class);
+    Route::resource('sliders',SliderController::class);
+    Route::resource('slider-images',SliderImageController::class);
+
 });
 
 require __DIR__ . '/auth.php';
