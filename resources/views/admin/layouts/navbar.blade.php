@@ -121,6 +121,9 @@
                                         <a class="dropdown-item" href="{{ route('admin.attributes.index') }}">
                                             Attribute
                                         </a>
+                                        <a class="dropdown-item" href="{{ route('admin.attribute-values.index') }}">
+                                            Attribute value
+                                        </a>
                                         <a class="dropdown-item" href="{{ route('admin.products.index') }}">
                                             Product
                                         </a>

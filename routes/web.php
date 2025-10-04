@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\backend\AttributeController;
+use App\Http\Controllers\backend\AttributeValueController;
 use App\Http\Controllers\backend\CategoryController;
 use App\Http\Controllers\backend\ContactController;
 use App\Http\Controllers\backend\GeneralSettingController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\backend\SliderController;
 use App\Http\Controllers\backend\SliderImageController;
 use App\Http\Controllers\LoadCategoryToProductController;
 use App\Http\Controllers\ProfileController;
+use App\Models\AttributeValue;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -42,6 +44,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::resource('products',ProductController::class);
     Route::get('load-category-to-product', [LoadCategoryToProductController::class,'loasCategory'])->name('load.category.to.product');
     Route::resource('attributes',AttributeController::class);
+    Route::resource('attribute-values',AttributeValueController::class);
 
 });
 

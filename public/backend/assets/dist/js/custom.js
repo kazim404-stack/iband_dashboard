@@ -1320,6 +1320,164 @@ $(document).ready(function () {
             }
         })
     });
+    // call select 2 on attribute value
+    $('#create-attribute-value').on('shown.bs.modal', function () {
+        let modal = $(this);
+
+        modal.find('.select2').select2({
+            placeholder: "Select attribute",
+            allowClear: true,
+            dropdownParent: modal
+        });
+    });
+    // store attribute value
+    $(document).on('click', '#store-attribute-value', function (e) {
+        e.preventDefault();
+        let form = $('#create-attribute-value-form');
+        let data = new FormData(form[0]);
+        let btn = $(this);
+        let getUrl = form.attr('action');
+        let modal = $('#create-attribute-value');
+        btn.prop('disabled', true);
+        $.ajax({
+            url: getUrl,
+            type: 'post',
+            processData: false,
+            contentType: false,
+            data: data,
+            success: function (response) {
+                if (response.status == "success") {
+
+                    btn.prop('disabled', false);
+                    form[0].reset();
+                    modal.modal('hide');
+                    toastr.success(response.message);
+                    $("#attributevalues-table").DataTable().ajax.reload(null, false);
+                }
+
+            }, error: function (xhr) {
+                btn.prop('disabled', false);
+
+                if (xhr.status === 422) {
+                    modal.modal('show');
+                    $('.text-danger').remove(); // Clear all old error messages
+
+                    let errors = xhr.responseJSON.errors;
+
+                    $.each(errors, function (key, value) {
+                        let fieldName;
+
+                        // Convert dot notation to array format: address.en => address[en]
+                        if (key.includes('.')) {
+                            const parts = key.split('.');
+                            fieldName = parts.shift() + '[' + parts.join('][') + ']';
+                        } else {
+                            fieldName = key;
+                        }
+
+                        // Select by name attribute
+
+                        const inputField = $(`#create-attribute-value-form [name="${fieldName}"]`);
+
+                        if (inputField.length > 0) {
+                            inputField.next('.text-danger').remove();
+                            inputField.after(`<p class="text-danger">${value[0]}</p>`);
+                        } else {
+                            console.warn('Field not found:', fieldName);
+                        }
+                    });
+                }
+            }
+        });
+    });
+    // edit attribute value
+    $(document).on('click', '.edit-attribute-value-btn', function (e) {
+        e.preventDefault();
+        let getUrl = $(this).attr("href");
+        $.ajax({
+            url: getUrl,
+            type: 'get',
+            success: function (response) {
+                if (response.status == "success") {
+                    console.log(response.data);
+
+                    window.availableLanguages.forEach(lang => {
+                        $("#edit-attribute-value-form [name='value[" + lang + "]']").val(response.data.value?.[lang] ?? '');
+                    });
+                    let select = $('#edit-attribute-value-form [name = "attribute_id"]');
+                    select.empty()
+                    response.attributes.forEach(attribute => {
+                        let selected = attribute.id == response.data.attribute_id ? 'selected' : '';
+                        select.append(`<option value="${attribute.id}" ${selected}>${attribute.name.en}</option>`)
+                    });
+                    $("#edit-attribute-value-form [name='slug']").val(response.data.slug);
+                    $("#edit-attribute-value-form [name='sort_order']").val(response.data.sort_order);
+                    let actionUrl = `attribute-values/${response.data.id}`;
+                    $("#edit-attribute-value-form").attr('action', actionUrl);
+                }
+            },
+            error: function (xhr) {
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    toastr.error(xhr.responseJSON.message);
+                } else {
+                    toastr.error("An unexpected error occurred.");
+                }
+            }
+        });
+    });
+    // update attribute value
+    $(document).on('click', '#update-attribute-value', function (e) {
+        e.preventDefault();
+        let form = $('#edit-attribute-value-form');
+        let getUrl = form.attr('action');
+        let data = new FormData(form[0]);
+        data.append('_method', 'PUT');
+        let modal = $('#edit-attribute-value');
+        $.ajax({
+            url: getUrl,
+            type: 'post',
+            data: data,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.status == "success") {
+                    toastr.success(response.message);
+                    $('#attributevalues-table').DataTable().ajax.reload(null, false);
+                    modal.modal('hide');
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    modal.modal('show');
+                    $('.text-danger').remove();
+
+                    let errors = xhr.responseJSON.errors;
+
+                    $.each(errors, function (key, value) {
+                        let fieldName;
+
+                        // Convert dot notation to array format: address.en => address[en]
+                        if (key.includes('.')) {
+                            const parts = key.split('.');
+                            fieldName = parts.shift() + '[' + parts.join('][') + ']';
+                        } else {
+                            fieldName = key;
+                        }
+
+                        // Select by name attribute
+                        const inputField = $(`#edit-attribute-value-form [name="${fieldName}"]`);
+
+                        if (inputField.length > 0) {
+                            inputField.next('.text-danger').remove();
+                            inputField.after(`<p class="text-danger">${value[0]}</p>`);
+                        } else {
+                            console.warn('Field not found:', fieldName);
+                        }
+                    });
+                }
+            }
+        })
+    });
 
 
 
