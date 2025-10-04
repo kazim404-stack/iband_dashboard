@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+ <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>iband dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
         referrerpolicy="no-referrer" />
@@ -19,6 +19,7 @@
     <link href="{{ asset('backend/assets/dist/css/demo.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('backend/assets/dist/css/toastr.css') }}" rel="stylesheet" />
     <link href="{{ asset('backend/assets/dist/css/datatable.css') }}" rel="stylesheet" />
+    <link href="{{ asset('backend/assets/dist/css/select2.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('backend/assets/dist/css/custom.css') }}" rel="stylesheet" />
     <style>
         @import url('https://rsms.me/inter/inter.css');

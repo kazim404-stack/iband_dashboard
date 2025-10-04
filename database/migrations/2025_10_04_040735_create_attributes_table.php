@@ -11,15 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('attributes', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('parent_id');
             $table->json('name');
-            $table->string('image');
-            $table->string('slug')->nullable()->unique();
-            $table->json('description')->nullable();
-            $table->integer('sort_order')->default(0);
-            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }
@@ -29,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('attributes');
     }
 };

@@ -22,7 +22,27 @@ class CategoriesDataTable extends DataTable
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return (new EloquentDataTable($query))
-            ->addColumn('action', 'categories.action')
+            ->addColumn('action', function ($query) {
+                return '<div class="d-flex justify-content-between ">
+            <a href="' . route('admin.categories.edit', $query->id) . '"  class="btn btn-primary btn-md edit-category-btn" data-bs-toggle="modal" data-bs-target="#edit-category" style="margin-right:4px;"><i class="fas fa-edit"></i></a>
+            <a href="' . route('admin.categories.destroy', $query->id) . '" class="btn btn-danger btn-md" id="confirmation" data-datatable_id="#categories-table"><i class="fas fa-trash" ></i></a>
+            </div>';
+            })->addColumn('name', function ($query) {
+                return $query->getTranslation('name', 'en');
+            })->addColumn('parent_category', function ($query) {
+                return $query->parentCategory ? $query->parentCategory->getTranslation('name', 'en'): '0';
+            })
+            ->addColumn('status', function ($query) {
+                return $query->status == 1 ? '<span class="badge bg-success text-white">Active</span>' : '<span class="badge bg-warning text-white">Inactive</span>';
+            })->addColumn('image', function ($query) {
+                return '<img class="img-thumbnail" src="' . asset($query->image) . '" alt="category-image-' . $query->id . '" width="100"/>';
+            })->filterColumn('name', function ($query, $keyword) {
+                $query->whereRaw(
+                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, '$.\"en\"'))) LIKE ?",
+                    ["%" . strtolower($keyword) . "%"]
+                );
+            })
+            ->rawColumns(['action', 'image', 'status'])
             ->setRowId('id');
     }
 
@@ -42,19 +62,19 @@ class CategoriesDataTable extends DataTable
     public function html(): HtmlBuilder
     {
         return $this->builder()
-                    ->setTableId('categories-table')
-                    ->columns($this->getColumns())
-                    ->minifiedAjax()
-                    ->orderBy(1)
-                    ->selectStyleSingle()
-                    ->buttons([
-                        Button::make('excel'),
-                        Button::make('csv'),
-                        Button::make('pdf'),
-                        Button::make('print'),
-                        Button::make('reset'),
-                        Button::make('reload')
-                    ]);
+            ->setTableId('categories-table')
+            ->columns($this->getColumns())
+            ->minifiedAjax()
+            ->orderBy(1)
+            ->selectStyleSingle()
+            ->buttons([
+                Button::make('excel'),
+                Button::make('csv'),
+                Button::make('pdf'),
+                Button::make('print'),
+                Button::make('reset'),
+                Button::make('reload')
+            ]);
     }
 
     /**
@@ -63,15 +83,16 @@ class CategoriesDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::computed('action')
-                  ->exportable(false)
-                  ->printable(false)
-                  ->width(60)
-                  ->addClass('text-center'),
             Column::make('id'),
-            Column::make('add your columns'),
-            Column::make('created_at'),
-            Column::make('updated_at'),
+            Column::make('name'),
+            Column::make('parent_category'),
+            Column::make('image'),
+            Column::make('status'),
+            Column::computed('action')
+                ->exportable(false)
+                ->printable(false)
+                ->width(60)
+                ->addClass('text-center'),
         ];
     }
 
