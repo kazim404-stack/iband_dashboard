@@ -64,7 +64,7 @@ class AttributeValueController extends Controller
     {
         $validatedData = $request->validated();
         $attributeValue->update($validatedData);
-        return response()->json(['status' => 'success','message' => 'Updated successfully']);
+        return response()->json(['status' => 'success', 'message' => 'Updated successfully']);
     }
 
     /**

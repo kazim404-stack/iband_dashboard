@@ -127,6 +127,9 @@
                                         <a class="dropdown-item" href="{{ route('admin.products.index') }}">
                                             Product
                                         </a>
+                                        <a class="dropdown-item" href="{{ route('admin.product-variants.index') }}">
+                                            Product Variant
+                                        </a>
                                     </div>
                                 </div>
                             </div>

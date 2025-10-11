@@ -664,6 +664,28 @@ $(document).ready(function () {
             }
         });
     });
+    // load product_id and attribute to product_variants
+    $('#create-product-variant').on('shown.bs.modal', function () {
+        let modal = $(this);
+        modal.find('.select2').each(function () {
+            $(this).select2({
+                placeholder: "Select attribute",
+                allowClear: true,
+                dropdownParent: modal
+            });
+        });
+    });
+    $('#edit-product-variant').on('shown.bs.modal', function () {
+        let modal = $(this);
+        modal.find('.select2').each(function () {
+            $(this).select2({
+                placeholder: "Select attribute",
+                allowClear: true,
+                dropdownParent: modal
+            });
+        });
+    });
+
     // Load category parent edit select
     // $('#edit-category').on('shown.bs.modal', function () {
     //     let modal = $(this);
@@ -1478,6 +1500,160 @@ $(document).ready(function () {
             }
         })
     });
+    // store product variant
+    $(document).on('click', '#store-product-variant', function (e) {
+        e.preventDefault();
+        let form = $('#create-product-variant-form');
+        let data = new FormData(form[0]);
+        let btn = $(this);
+        let getUrl = form.attr('action');
+        let modal = $('#create-product-variant');
+        btn.prop('disabled', true);
+        $.ajax({
+            url: getUrl,
+            type: 'post',
+            processData: false,
+            contentType: false,
+            data: data,
+            success: function (response) {
+                if (response.status == "success") {
+
+                    btn.prop('disabled', false);
+                    form[0].reset();
+                    modal.modal('hide');
+                    toastr.success(response.message);
+                    $("#productvariants-table").DataTable().ajax.reload(null, false);
+                }
+
+            }, error: function (xhr) {
+                btn.prop('disabled', false);
+
+                if (xhr.status === 422) {
+                    modal.modal('show');
+                    $('.text-danger').remove(); // Clear all old error messages
+
+                    let errors = xhr.responseJSON.errors;
+
+                    $.each(errors, function (key, value) {
+                        let fieldName;
+
+                        // Convert dot notation to array format: address.en => address[en]
+                        if (key.includes('.')) {
+                            const parts = key.split('.');
+                            fieldName = parts.shift() + '[' + parts.join('][') + ']';
+                        } else {
+                            fieldName = key;
+                        }
+
+                        // Select by name attribute
+
+                        const inputField = $(`#create-product-variant-form [name="${fieldName}"]`);
+
+                        if (inputField.length > 0) {
+                            inputField.next('.text-danger').remove();
+                            inputField.after(`<p class="text-danger">${value[0]}</p>`);
+                        } else {
+                            console.warn('Field not found:', fieldName);
+                        }
+                    });
+                }
+            }
+        });
+    });
+    // Edit product variant
+    $(document).on('click', '.edit-product-variant-btn', function (e) {
+        e.preventDefault();
+        let getUrl = $(this).attr("href");
+        let modal = $('#edit-product-variant');
+        $.ajax({
+            url: getUrl,
+            type: 'get',
+            success: function (response) {
+                if (response.status == "success") {
+                    modal.find('#attribute-value-select').html(response.html);
+                    let select = $('#edit-product-variant [name="product_id"]');
+                    select.empty();
+                    response.products.forEach(product => {
+                        let selected = product.id == response.data.product_id ? 'selected' : '';
+                        select.append(`<option value="${product.id}" ${selected}>${product.name.en}</option>`)
+                    });
+                    $('#edit-product-variant [name="sku"]').val(response.data.sku);
+                    $('#edit-product-variant [name="price"]').val(response.data.price);
+                    $('#edit-product-variant [name="barcode"]').val(response.data.barcode);
+                    $('#edit-product-variant [name="compare_price"]').val(response.data.compare_price);
+                    $('#edit-product-variant [name="cost_price"]').val(response.data.cost_price);
+                    $('#edit-product-variant [name="qty"]').val(response.data.qty);
+                    $('#edit-product-variant [name="min_order_qty"]').val(response.data.min_order_qty);
+                    $('#edit-product-variant [name="max_order_qty"]').val(response.data.max_order_qty);
+                    $('#edit-product-variant [name="is_track_stock"]').val(response.data.is_track_stock);
+                    let actionUrl = `product-variants/${response.data.id}`;
+                    $("#edit-product-variant-form").attr('action', actionUrl);
+                }
+            },
+            error: function (xhr) {
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    toastr.error(xhr.responseJSON.message);
+                } else {
+                    toastr.error("An unexpected error occurred.");
+                }
+            }
+        });
+    });
+    // update product variant
+        $(document).on('click', '#update-product-variant', function (e) {
+        e.preventDefault();
+        let form = $('#edit-product-variant-form');
+        let getUrl = form.attr('action');
+        let data = new FormData(form[0]);
+        data.append('_method', 'PUT');
+        let modal = $('#edit-product-variant');
+        $.ajax({
+            url: getUrl,
+            type: 'post',
+            data: data,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.status == "success") {
+                    toastr.success(response.message);
+                    $('#productvariants-table').DataTable().ajax.reload(null, false);
+                    modal.modal('hide');
+                }
+            },
+            error: function (xhr) {
+
+
+                if (xhr.status === 422) {
+                    modal.modal('show');
+                    $('.text-danger').remove(); // Clear all old error messages
+
+                    let errors = xhr.responseJSON.errors;
+
+                    $.each(errors, function (key, value) {
+                        let fieldName;
+
+                        // Convert dot notation to array format: address.en => address[en]
+                        if (key.includes('.')) {
+                            const parts = key.split('.');
+                            fieldName = parts.shift() + '[' + parts.join('][') + ']';
+                        } else {
+                            fieldName = key;
+                        }
+                        // Select by name attribute
+                        const inputField = $(`#edit-product-variant-form [name="${fieldName}"]`);
+
+                        if (inputField.length > 0) {
+                            inputField.next('.text-danger').remove();
+                            inputField.after(`<p class="text-danger">${value[0]}</p>`);
+                        } else {
+                            console.warn('Field not found:', fieldName);
+                        }
+                    });
+                }
+            }
+        })
+    });
+
 
 
 

@@ -9,6 +9,7 @@ use App\Http\Controllers\backend\LoadParentCategoryController;
 use App\Http\Controllers\backend\PhoneController;
 use App\Http\Controllers\backend\ProductController;
 use App\Http\Controllers\backend\ProductImageController;
+use App\Http\Controllers\backend\ProductVariantController;
 use App\Http\Controllers\backend\SliderController;
 use App\Http\Controllers\backend\SliderImageController;
 use App\Http\Controllers\LoadCategoryToProductController;
@@ -45,6 +46,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::get('load-category-to-product', [LoadCategoryToProductController::class,'loasCategory'])->name('load.category.to.product');
     Route::resource('attributes',AttributeController::class);
     Route::resource('attribute-values',AttributeValueController::class);
+    Route::resource('product-variants',ProductVariantController::class);
 
 });
 

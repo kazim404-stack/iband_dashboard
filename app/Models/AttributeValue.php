@@ -10,12 +10,22 @@ class AttributeValue extends Model
 {
     use HasTranslations;
     protected $fillable = [
-        'attribute_id','slug','value','sort_order'
+        'attribute_id',
+        'slug',
+        'value',
+        'sort_order'
     ];
     public $translatable = [
         'value'
     ];
-    public function attribute(){
+    public function attribute()
+    {
         return $this->belongsTo(Attribute::class);
+    }
+    public function productVariants()
+    {
+        return $this->belongsToMany(ProductVariant::class, 'product_variant_attribute_values')
+            ->withPivot('attribute_id')
+            ->withTimestamps();
     }
 }
