@@ -47,6 +47,8 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::resource('attributes',AttributeController::class);
     Route::resource('attribute-values',AttributeValueController::class);
     Route::resource('product-variants',ProductVariantController::class);
+    Route::get('product-det',[LoadCategoryToProductController::class,'productDetails']);
+
 
 });
 

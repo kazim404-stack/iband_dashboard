@@ -55,7 +55,6 @@ class ProductVariantController extends Controller
     {
         //
     }
-
     /**
      * Show the form for editing the specified resource.
      */
@@ -67,14 +66,12 @@ class ProductVariantController extends Controller
         $attributeValue = view('admin.productVariant.partials.edit_attribute_value', compact('productVariant', 'attributeValues'))->render();
         return response()->json(['status' => 'success', 'data' => $productVariant, 'products' => $products, 'html' => $attributeValue]);
     }
-
     /**
      * Update the specified resource in storage.
      */
     public function update(UpdateProductVariantRequest $request, ProductVariant $product_variant)
     {
         $validatedData = $request->validated();
-
         // Ensure default if not provided
         $validatedData['min_order_qty'] = $request->min_order_qty ?? 1;
 
@@ -93,21 +90,17 @@ class ProductVariantController extends Controller
                     ];
                 }
             }
-
             // Use sync() instead of attach() — it updates the pivot cleanly
             $product_variant->attributeValues()->sync($syncData);
         } else {
             // If no attributes sent, detach all
             $product_variant->attributeValues()->detach();
         }
-
         return response()->json([
             'status' => 'success',
             'message' => 'Updated successfully',
         ]);
     }
-
-
     /**
      * Remove the specified resource from storage.
      */

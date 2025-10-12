@@ -15,4 +15,7 @@ class Slider extends Model
         'status'
     ];
     public $translatable = ['title', 'description'];
+    public function sliderImages(){
+        return $this->hasMany(SliderImage::class);
+    }
 }
