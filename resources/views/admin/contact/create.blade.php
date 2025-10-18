@@ -17,8 +17,12 @@
                                 <div class="mb-3">
                                     <label for="site_name" class="form-label">General setting</label>
                                     <select name="general_setting_id" id="general_setting_id" class="form-control">
+                                        @if($generalSetting)
                                         <option value="{{ $generalSetting->id }}">{{ $generalSetting->site_name }}
                                         </option>
+                                        @else
+                                        <option value="">No branch found</option>
+                                        @endif
                                     </select>
                                 </div>
                             </div>

@@ -13,7 +13,6 @@ class ProductVariant extends Model
         'price',
         'compare_price',
         'cost_price',
-        'qty',
         'min_order_qty',
         'max_order_qty',
         'is_track_stock',
@@ -27,5 +26,9 @@ class ProductVariant extends Model
         return $this->belongsToMany(AttributeValue::class, 'product_variant_attribute_values')
             ->withPivot('attribute_id')
             ->withTimestamps();
+    }
+    public function stocks()
+    {
+        return $this->hasMany(Stock::class, 'product_variant_id');
     }
 }

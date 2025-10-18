@@ -24,6 +24,7 @@ class UpdateProductVariantRequest extends FormRequest
     {
         return [
             'product_id' => 'required|exists:products,id',
+            'currency_id' => 'required|exists:currencies,id',
             'attribute_value_ids' => 'required|array',
             'attribute_value_ids.*' => 'exists:attribute_values,id',
             'sku' => [
@@ -37,7 +38,7 @@ class UpdateProductVariantRequest extends FormRequest
             'price' => 'required|numeric|min:0',
             'compare_price' => 'nullable|numeric|min:0',
             'cost_price' => 'nullable|numeric|min:0',
-            'qty' => 'required|integer|min:0',
+            // 'qty' => 'required|integer|min:0',
             'min_order_qty' => 'nullable|integer|min:1',
             'max_order_qty' => 'nullable|integer|gte:min_order_qty',
             'is_track_stock' => 'required|boolean',
@@ -50,6 +51,10 @@ class UpdateProductVariantRequest extends FormRequest
             'product_id.required' => 'Product ID is required.',
             'product_id.exists' => 'Selected product does not exist.',
 
+
+            'currency_id.required' => 'The currency field is required.',
+            'currency_id.exists' => 'The selected currency does not exist.',
+
             'attribute_value_ids.required' => 'Please select at least one attribute value.',
             'attribute_value_ids.array' => 'Invalid format for attribute values.',
             'attribute_value_ids.*.exists' => 'One or more selected attribute values are invalid.',
@@ -57,7 +62,7 @@ class UpdateProductVariantRequest extends FormRequest
             'sku.unique' => 'This SKU is already in use.',
             'price.required' => 'Please enter the product price.',
             'price.numeric' => 'Price must be a number.',
-            'qty.required' => 'Please specify the available quantity.',
+            // 'qty.required' => 'Please specify the available quantity.',
             'min_order_qty.min' => 'Minimum order quantity must be at least 1.',
             'max_order_qty.gte' => 'Maximum order quantity must be greater than or equal to the minimum order quantity.',
             'is_track_stock.boolean' => 'Invalid stock tracking value.',

@@ -685,6 +685,27 @@ $(document).ready(function () {
             });
         });
     });
+    // load product in stock
+    $('#create-stock').on('shown.bs.modal', function () {
+        let modal = $(this);
+        modal.find('.select2').each(function () {
+            $(this).select2({
+                placeholder: "Select product",
+                allowClear: true,
+                dropdownParent: modal
+            });
+        });
+    });
+    $('#edit-stock').on('shown.bs.modal', function () {
+        let modal = $(this);
+        modal.find('.select2').each(function () {
+            $(this).select2({
+                placeholder: "Select product",
+                allowClear: true,
+                dropdownParent: modal
+            });
+        });
+    });
 
     // Load category parent edit select
     // $('#edit-category').on('shown.bs.modal', function () {
@@ -1600,7 +1621,7 @@ $(document).ready(function () {
         });
     });
     // update product variant
-        $(document).on('click', '#update-product-variant', function (e) {
+    $(document).on('click', '#update-product-variant', function (e) {
         e.preventDefault();
         let form = $('#edit-product-variant-form');
         let getUrl = form.attr('action');
@@ -1641,6 +1662,293 @@ $(document).ready(function () {
                         }
                         // Select by name attribute
                         const inputField = $(`#edit-product-variant-form [name="${fieldName}"]`);
+
+                        if (inputField.length > 0) {
+                            inputField.next('.text-danger').remove();
+                            inputField.after(`<p class="text-danger">${value[0]}</p>`);
+                        } else {
+                            console.warn('Field not found:', fieldName);
+                        }
+                    });
+                }
+            }
+        })
+    });
+    // Store stock
+    $(document).on('click', '#store-stock', function (e) {
+        e.preventDefault();
+        let form = $('#create-stock-form');
+        let data = new FormData(form[0]);
+        let btn = $(this);
+        let getUrl = form.attr('action');
+        let modal = $('#create-stock');
+        btn.prop('disabled', true);
+        $.ajax({
+            url: getUrl,
+            type: 'post',
+            processData: false,
+            contentType: false,
+            data: data,
+            success: function (response) {
+                if (response.status == "success") {
+
+                    btn.prop('disabled', false);
+                    form[0].reset();
+                    modal.modal('hide');
+                    toastr.success(response.message);
+                    $("#stocks-table").DataTable().ajax.reload(null, false);
+                }
+
+            }, error: function (xhr) {
+                btn.prop('disabled', false);
+
+                if (xhr.status === 422) {
+                    modal.modal('show');
+                    $('.text-danger').remove(); // Clear all old error messages
+
+                    let errors = xhr.responseJSON.errors;
+
+                    $.each(errors, function (key, value) {
+                        let fieldName;
+
+                        // Convert dot notation to array format: address.en => address[en]
+                        if (key.includes('.')) {
+                            const parts = key.split('.');
+                            fieldName = parts.shift() + '[' + parts.join('][') + ']';
+                        } else {
+                            fieldName = key;
+                        }
+
+                        // Select by name attribute
+
+                        const inputField = $(`#create-stock-form [name="${fieldName}"]`);
+
+                        if (inputField.length > 0) {
+                            inputField.next('.text-danger').remove();
+                            inputField.after(`<p class="text-danger">${value[0]}</p>`);
+                        } else {
+                            console.warn('Field not found:', fieldName);
+                        }
+                    });
+                }
+            }
+        });
+    });
+    // edit stock
+    $(document).on('click', '.edit-stock-btn', function (e) {
+        e.preventDefault();
+        let getUrl = $(this).attr("href");
+        $.ajax({
+            url: getUrl,
+            type: 'get',
+            success: function (response) {
+                if (response.status == "success") {
+                    let select = $("#edit-stock-form [name='product_variant_id']");
+                    let selectCurrency = $("#edit-stock-form [name='currency_id']");
+
+                    select.empty();
+                    response.productVariants.forEach(productVariant => {
+                        let selected = response.data.product_variant_id == productVariant.id ? 'selected' : '';
+                        select.append(`<option value="${productVariant.id}" ${selected}>${productVariant.product.name.en}</option>`)
+                    });
+                    response.currencies.forEach(currency => {
+                        let currencySelected = response.data.currency_id == currency.id ? 'selected' : '';
+                        selectCurrency.append(`<option value="${currency.id}" ${currencySelected}>${currency.code}</option>`)
+                    });
+                    $("#edit-stock-form [name='stock_status']").val(response.data.stock_status).trigger('change');
+                    $("#edit-stock-form [name='qty']").val(response.data.qty);
+
+
+                    let actionUrl = `stock/${response.data.id}`;
+                    $("#edit-stock-form").attr('action', actionUrl);
+                }
+            },
+            error: function (xhr) {
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    toastr.error(xhr.responseJSON.message);
+                } else {
+                    toastr.error("An unexpected error occurred.");
+                }
+            }
+        });
+    });
+    // Update contact
+    $(document).on('click', '#update-stock', function (e) {
+        e.preventDefault();
+        let form = $('#edit-stock-form');
+        let getUrl = form.attr('action');
+        let data = new FormData(form[0]);
+        data.append('_method', 'PUT');
+        let modal = $('#edit-stock');
+        $.ajax({
+            url: getUrl,
+            type: 'post',
+            data: data,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.status == "success") {
+                    toastr.success(response.message);
+                    $('#stocks-table').DataTable().ajax.reload(null, false);
+                    modal.modal('hide');
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    modal.modal('show');
+                    $('.text-danger').remove();
+                    let errors = xhr.responseJSON.errors;
+                    $.each(errors, function (key, value) {
+                        let fieldName;
+                        // Convert dot notation to array format: address.en => address[en]
+                        if (key.includes('.')) {
+                            const parts = key.split('.');
+                            fieldName = parts.shift() + '[' + parts.join('][') + ']';
+                        } else {
+                            fieldName = key;
+                        }
+                        const inputField = $(`#edit-stock-form [name="${fieldName}"]`);
+                        if (inputField.length > 0) {
+                            inputField.next('.text-danger').remove();
+                            inputField.after(`<p class="text-danger">${value[0]}</p>`);
+                        } else {
+                            console.warn('Field not found:', fieldName);
+                        }
+                    });
+                }
+            }
+        })
+    });
+    // Store currency
+    $(document).on('click', '#store-currency', function (e) {
+        e.preventDefault();
+        let form = $('#create-currency-form');
+        let data = new FormData(form[0]);
+        let btn = $(this);
+        let getUrl = form.attr('action');
+        let modal = $('#create-currency');
+        btn.prop('disabled', true);
+        $.ajax({
+            url: getUrl,
+            type: 'post',
+            processData: false,
+            contentType: false,
+            data: data,
+            success: function (response) {
+                if (response.status == "success") {
+                    btn.prop('disabled', false);
+                    form[0].reset();
+                    modal.modal('hide');
+                    toastr.success(response.message);
+                    $("#currencies-table").DataTable().ajax.reload(null, false);
+                }
+
+            }, error: function (xhr) {
+                btn.prop('disabled', false);
+
+                if (xhr.status === 422) {
+                    modal.modal('show');
+                    $('.text-danger').remove(); // Clear all old error messages
+
+                    let errors = xhr.responseJSON.errors;
+
+                    $.each(errors, function (key, value) {
+                        let fieldName;
+
+                        // Convert dot notation to array format: address.en => address[en]
+                        if (key.includes('.')) {
+                            const parts = key.split('.');
+                            fieldName = parts.shift() + '[' + parts.join('][') + ']';
+                        } else {
+                            fieldName = key;
+                        }
+
+                        // Select by name attribute
+
+                        const inputField = $(`#create-currency-form [name="${fieldName}"]`);
+
+                        if (inputField.length > 0) {
+                            inputField.next('.text-danger').remove();
+                            inputField.after(`<p class="text-danger">${value[0]}</p>`);
+                        } else {
+                            console.warn('Field not found:', fieldName);
+                        }
+                    });
+                }
+            }
+        });
+    });
+    // edit currency
+    $(document).on('click', '.edit-currency-btn', function (e) {
+        e.preventDefault();
+        let getUrl = $(this).attr("href");
+        $.ajax({
+            url: getUrl,
+            type: 'get',
+            success: function (response) {
+                if (response.status == "success") {
+                    $("#edit-currency-form [name='is_default']").val(response.data.is_default).trigger('change');
+                    $("#edit-currency-form [name='code']").val(response.data.code);
+                    $("#edit-currency-form [name='symbol']").val(response.data.symbol);
+                    $("#edit-currency-form [name='exchange_rate']").val(response.data.exchange_rate);
+
+                    let actionUrl = `currencies/${response.data.id}`;
+                    $("#edit-currency-form").attr('action', actionUrl);
+                }
+            },
+            error: function (xhr) {
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    toastr.error(xhr.responseJSON.message);
+                } else {
+                    toastr.error("An unexpected error occurred.");
+                }
+            }
+        });
+    });
+    // Update currency
+    $(document).on('click', '#update-currency', function (e) {
+        e.preventDefault();
+        let form = $('#edit-currency-form');
+        let getUrl = form.attr('action');
+        let data = new FormData(form[0]);
+        data.append('_method', 'PUT');
+        let modal = $('#edit-currency');
+        $.ajax({
+            url: getUrl,
+            type: 'post',
+            data: data,
+            processData: false,
+            contentType: false,
+
+            success: function (response) {
+                if (response.status == "success") {
+                    toastr.success(response.message);
+                    $('#currencies-table').DataTable().ajax.reload(null, false);
+                    modal.modal('hide');
+                }
+            },
+            error: function (xhr) {
+
+
+                if (xhr.status === 422) {
+                    modal.modal('show');
+                    $('.text-danger').remove();
+
+                    let errors = xhr.responseJSON.errors;
+
+                    $.each(errors, function (key, value) {
+                        let fieldName;
+
+                        // Convert dot notation to array format: address.en => address[en]
+                        if (key.includes('.')) {
+                            const parts = key.split('.');
+                            fieldName = parts.shift() + '[' + parts.join('][') + ']';
+                        } else {
+                            fieldName = key;
+                        }
+
+                        // Select by name attribute
+                        const inputField = $(`#edit-currency-form [name="${fieldName}"]`);
 
                         if (inputField.length > 0) {
                             inputField.next('.text-danger').remove();

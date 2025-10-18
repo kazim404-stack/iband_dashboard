@@ -11,6 +11,24 @@ use Illuminate\Http\Request;
 
 class HomeApiController extends Controller
 {
+    public function setCurrency(Request $request)
+    {
+        $request->validate([
+            'currency_code' => 'required|string|max:10|exists:currencies,code'
+        ]);
+        session(['currency_code' => strtoupper($request->currency_code)]);
+
+        return response()->json([
+            'status' => 'success',
+            'currency_code' => session('currency_code')
+        ]);
+    }
+    public function getCurrency()
+    {
+        return response()->json([
+            'currency_code' => session('currency_code', 'USD'),
+        ]);
+    }
     public function slider(Request $request)
     {
         $lang = $request->query('lang', app()->getLocale());
@@ -96,13 +114,28 @@ class HomeApiController extends Controller
     {
         $lang = $request->query('lang', app()->getLocale());
 
+
+        $currencyCode = session('currency_code', 'USD');
+
+
+        $selectedCurrency = \App\Models\Currency::where('code', $currencyCode)->first();
+        $defaultCurrency  = \App\Models\Currency::where('is_default', 1)->first();
+
+
+        $defaultRate = $defaultCurrency ? $defaultCurrency->exchange_rate : 1.0;
+        $selectedRate = $selectedCurrency ? $selectedCurrency->exchange_rate : 1.0;
+
+        $exchangeRate = $selectedRate / $defaultRate;
+
+
         $products = Product::with([
             'category',
             'productImages',
-            'productVariants.attributeValues.attribute'
+            'productVariants.attributeValues.attribute',
+            'productVariants.stocks.currency'
         ])->where('status', 1)->get();
 
-        $data = $products->map(function ($product) use ($lang) {
+        $data = $products->map(function ($product) use ($lang, $exchangeRate, $selectedCurrency) {
             return [
                 'id' => $product->id,
                 'name' => $product->getTranslation('name', $lang),
@@ -125,15 +158,28 @@ class HomeApiController extends Controller
                     'id' => $image->id,
                     'image' => $image->image,
                 ]),
-                'product_variants' => $product->productVariants->map(function ($variant) use ($lang) {
+                'product_variants' => $product->productVariants->map(function ($variant) use ($lang, $exchangeRate, $selectedCurrency) {
+
+                    $convertedPrice = $variant->price * $exchangeRate;
+                    $convertedComparePrice = $variant->compare_price ? $variant->compare_price * $exchangeRate : null;
+                    $convertedCostPrice = $variant->cost_price ? $variant->cost_price * $exchangeRate : null;
+
+                    $stockQty = $variant->stocks->sum('qty');
+                    $stockStatus = $stockQty > 0 ? 'in_stock' : 'out_of_stock';
+
                     return [
                         'id' => $variant->id,
                         'sku' => $variant->sku,
                         'barcode' => $variant->barcode,
-                        'price' => $variant->price,
-                        'compare_price' => $variant->compare_price,
-                        'cost_price' => $variant->cost_price,
-                        'qty' => $variant->qty,
+                        'price' => round($convertedPrice, 2),
+                        'compare_price' => $convertedComparePrice ? round($convertedComparePrice, 2) : null,
+                        'cost_price' => $convertedCostPrice ? round($convertedCostPrice, 2) : null,
+                        'currency' => [
+                            'code' => $selectedCurrency ? $selectedCurrency->code : 'USD',
+                            'symbol' => $selectedCurrency ? $selectedCurrency->symbol : '$',
+                        ],
+                        'qty' => $stockQty,
+                        'stock_status' => $stockStatus,
                         'attribute_values' => $variant->attributeValues->map(function ($value) use ($lang) {
                             return [
                                 'id' => $value->id,
@@ -148,19 +194,33 @@ class HomeApiController extends Controller
                 }),
             ];
         });
+
         return response()->json([
             'status' => 'success',
             'data' => $data
         ]);
     }
+
+
     public function productFilterByCatId(Request $request, $categoryId)
     {
         $lang = $request->query('lang', app()->getLocale());
+        // Get selected and default currency
+        $currencyCode = session('currency_code', 'USD');
 
+        $selectedCurrency = \App\Models\Currency::where('code', $currencyCode)->first();
+        $defaultCurrency  = \App\Models\Currency::where('is_default', 1)->first();
+
+        $defaultRate = $defaultCurrency ? $defaultCurrency->exchange_rate : 1.0;
+        $selectedRate = $selectedCurrency ? $selectedCurrency->exchange_rate : 1.0;
+        $exchangeRate = $selectedRate / $defaultRate;
+
+        // Fetch products with relationships
         $products = Product::with([
             'category',
             'productImages',
-            'productVariants.attributeValues.attribute'
+            'productVariants.attributeValues.attribute',
+            'productVariants.stocks.currency'
         ])->where('category_id', $categoryId)
             ->where('status', 1)
             ->get();
@@ -172,7 +232,8 @@ class HomeApiController extends Controller
             ], 404);
         }
 
-        $data = $products->map(function ($product) use ($lang) {
+        // Map products
+        $data = $products->map(function ($product) use ($lang, $exchangeRate, $selectedCurrency) {
             return [
                 'id' => $product->id,
                 'name' => $product->getTranslation('name', $lang),
@@ -191,21 +252,32 @@ class HomeApiController extends Controller
                     'id' => $product->category->id,
                     'name' => $product->category->getTranslation('name', $lang),
                 ] : null,
-                'product_images' => $product->productImages->map(function ($image) {
-                    return [
-                        'id' => $image->id,
-                        'image' => $image->image,
-                    ];
-                }),
-                'product_variants' => $product->productVariants->map(function ($variant) use ($lang) {
+                'product_images' => $product->productImages->map(fn($image) => [
+                    'id' => $image->id,
+                    'image' => $image->image,
+                ]),
+                'product_variants' => $product->productVariants->map(function ($variant) use ($lang, $exchangeRate, $selectedCurrency) {
+
+                    $convertedPrice = $variant->price * $exchangeRate;
+                    $convertedComparePrice = $variant->compare_price ? $variant->compare_price * $exchangeRate : null;
+                    $convertedCostPrice = $variant->cost_price ? $variant->cost_price * $exchangeRate : null;
+
+                    $stockQty = $variant->stocks->sum('qty');
+                    $stockStatus = $stockQty > 0 ? 'in_stock' : 'out_of_stock';
+
                     return [
                         'id' => $variant->id,
                         'sku' => $variant->sku,
                         'barcode' => $variant->barcode,
-                        'price' => $variant->price,
-                        'compare_price' => $variant->compare_price,
-                        'cost_price' => $variant->cost_price,
-                        'qty' => $variant->qty,
+                        'price' => round($convertedPrice, 2),
+                        'compare_price' => $convertedComparePrice ? round($convertedComparePrice, 2) : null,
+                        'cost_price' => $convertedCostPrice ? round($convertedCostPrice, 2) : null,
+                        'currency' => [
+                            'code' => $selectedCurrency ? $selectedCurrency->code : 'USD',
+                            'symbol' => $selectedCurrency ? $selectedCurrency->symbol : '$',
+                        ],
+                        'qty' => $stockQty,
+                        'stock_status' => $stockStatus,
                         'attribute_values' => $variant->attributeValues->map(function ($value) use ($lang) {
                             return [
                                 'id' => $value->id,

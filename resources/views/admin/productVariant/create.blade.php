@@ -72,13 +72,13 @@
                                         placeholder="Enter cost price">
                                 </div>
                             </div>
-                            <div class="col-lg-4">
+                            {{-- <div class="col-lg-4">
                                 <div class="mb-3">
                                     <label for="compare_price" class="form-label">Quantity</label>
                                     <input type="number" name="qty" id="qty" class="form-control"
                                         placeholder="Enter quantity">
                                 </div>
-                            </div>
+                            </div> --}}
                             <div class="col-lg-4">
                                 <div class="mb-3">
                                     <label for="min_order_qty" class="form-label">Min order quantity</label>

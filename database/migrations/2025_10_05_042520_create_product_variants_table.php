@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('price', 9, 2);
             $table->decimal('compare_price', 9, 2)->nullable();
             $table->decimal('cost_price', 9, 2)->nullable();
-            $table->integer('qty')->default(0);
+            // $table->integer('qty')->default(0);
             $table->integer('min_order_qty')->default(1);
             $table->integer('max_order_qty')->nullable();
             $table->boolean('is_track_stock')->default(true);

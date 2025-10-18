@@ -41,7 +41,7 @@ class UpdateCategoryRequest extends FormRequest
             'description'   => 'nullable|array',
             'description.*' => 'nullable|string|max:1000',
 
-            'sort_order'    => 'nullable|integer|min:0',
+            'sort_order'    => 'required|integer|min:0',
             'status'        => 'required|in:0,1',
         ];
     }
@@ -71,6 +71,7 @@ class UpdateCategoryRequest extends FormRequest
             'description.*.string' => 'Each description must be a valid string.',
             'description.*.max'  => 'Each description may not exceed 1000 characters.',
 
+             'sort_order.required'      => 'The sort order  is required.',
             'sort_order.integer' => 'The sort order must be a number.',
             'sort_order.min'     => 'The sort order must be at least 0.',
 

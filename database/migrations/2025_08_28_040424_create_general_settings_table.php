@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('instagram')->nullable();
             $table->string('whatsapp')->nullable();
             $table->string('telegram')->nullable();
-            $table->string('twitter')->nullable();
             $table->string('youtube')->nullable();
             $table->string('x')->nullable();
             $table->string('linkedin')->nullable();

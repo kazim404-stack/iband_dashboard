@@ -11,21 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attribute_values', function (Blueprint $table) {
+        Schema::create('currencies', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('attribute_id');
-            $table->string('slug')->unique();
-            $table->json('value');
-            $table->string('sort_order')->nullable();
+            $table->string('code')->unique();
+            $table->string('symbol');
+            $table->decimal('exchange_rate',10,4)->default(1.0);
+            $table->boolean('is_default')->default(0);
             $table->timestamps();
-            $table->foreign('attribute_id')->references('id')->on('attributes')->onDelete('cascade');
         });
     }
+
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('attribute_values');
+        Schema::dropIfExists('currencies');
     }
 };
