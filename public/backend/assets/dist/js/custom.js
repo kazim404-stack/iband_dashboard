@@ -4,6 +4,7 @@ $(document).ready(function () {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+    
     // $('.select2').select2();
     $(document).on('click', '#confirmation', function (e) {
         e.preventDefault();

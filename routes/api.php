@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\backend\GeneralController;
 use App\Http\Controllers\frontend\HomeApiController;
 use App\Http\Middleware\LocalizationMiddleware;
