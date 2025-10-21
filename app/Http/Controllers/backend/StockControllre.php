@@ -21,7 +21,7 @@ class StockControllre extends Controller
     {
         $productVariants  = ProductVariant::all();
         $currencies = Currency::all();
-        return $dataTable->render('admin.stock.index', compact('productVariants','currencies'));
+        return $dataTable->render('admin.stock.index', compact('productVariants', 'currencies'));
     }
 
     /**
@@ -58,8 +58,7 @@ class StockControllre extends Controller
         $stock = Stock::findOrFail($id);
         $productVariants = ProductVariant::with('product')->get();
         $currencies = Currency::all();
-        return response()->json(['status' => 'success', 'data' => $stock, 'productVariants' => $productVariants, '
-        currency' => $currencies]);
+        return response()->json(['status' => 'success', 'data' => $stock, 'productVariants' => $productVariants, 'currencies' => $currencies]);
     }
 
     /**

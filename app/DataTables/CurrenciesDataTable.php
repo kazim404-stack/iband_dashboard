@@ -27,11 +27,12 @@ class CurrenciesDataTable extends DataTable
             <a href="' . route('admin.currencies.edit', $query->id) . '"  class="btn btn-primary btn-md edit-currency-btn" data-bs-toggle="modal" data-bs-target="#edit-currency" style="margin-right:4px;"><i class="fas fa-edit"></i></a>
             <a href="' . route('admin.currencies.destroy', $query->id) . '" class="btn btn-danger btn-md" id="confirmation" data-datatable_id="#currencies-table"><i class="fas fa-trash" ></i></a>
             </div>';
+            })->addColumn('is_default',function($query){
+                return $query->is_default == 1 ? '<span class="badge bg-success text-white">Yes</span>' : '<span class="badge bg-primary text-white">No</span>';
             })
-            ->rawColumns(['action'])
+            ->rawColumns(['action','is_default'])
             ->setRowId('id');
     }
-
     /**
      * Get the query source of dataTable.
      *
@@ -74,6 +75,7 @@ class CurrenciesDataTable extends DataTable
             Column::make('code'),
             Column::make('symbol'),
             Column::make('exchange_rate'),
+            Column::make('is_default'),
              Column::computed('action')
                 ->exportable(false)
                 ->printable(false)

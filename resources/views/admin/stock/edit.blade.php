@@ -9,16 +9,32 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form
-                        id="edit-stock-form">
+                    <form id="edit-stock-form">
                         @csrf
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="mb-3">
                                     <label for="site_name" class="form-label">Select product</label>
-                                    <select name="product_variant_id" id="product_variant_id" class="form-control select2">
-                                        
+                                    <select name="product_variant_id" id="product_variant_id"
+                                        class="form-control select2">
 
+
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label for="currency_id" class="form-label">Select currency</label>
+                                    <select name="currency_id" id="currency_id" class="form-control">
+                                        {{-- @if ($currencies->count() > 0)
+                                            @foreach ($currencies as $currency)
+                                                <option value="{{ $currency->id }}">
+                                                    {{ $currency->code }}
+                                                </option>
+                                            @endforeach
+                                        @else
+                                            <option value="">No currency found</option>
+                                        @endif --}}
                                     </select>
                                 </div>
                             </div>

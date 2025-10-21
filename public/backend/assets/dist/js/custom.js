@@ -4,7 +4,7 @@ $(document).ready(function () {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
-    
+
     // $('.select2').select2();
     $(document).on('click', '#confirmation', function (e) {
         e.preventDefault();
@@ -1744,6 +1744,8 @@ $(document).ready(function () {
             type: 'get',
             success: function (response) {
                 if (response.status == "success") {
+                    console.log(response);
+
                     let select = $("#edit-stock-form [name='product_variant_id']");
                     let selectCurrency = $("#edit-stock-form [name='currency_id']");
 
@@ -1773,7 +1775,7 @@ $(document).ready(function () {
             }
         });
     });
-    // Update contact
+    // Update stock
     $(document).on('click', '#update-stock', function (e) {
         e.preventDefault();
         let form = $('#edit-stock-form');

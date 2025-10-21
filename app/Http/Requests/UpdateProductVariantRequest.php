@@ -24,14 +24,13 @@ class UpdateProductVariantRequest extends FormRequest
     {
         return [
             'product_id' => 'required|exists:products,id',
-            'currency_id' => 'required|exists:currencies,id',
+            // 'currency_id' => 'required|exists:currencies,id',
             'attribute_value_ids' => 'required|array',
             'attribute_value_ids.*' => 'exists:attribute_values,id',
             'sku' => [
                 'nullable',
                 'string',
                 'max:100',
-
                 Rule::unique('product_variants', 'sku')->ignore($this->route('product_variant')),
             ],
             'barcode' => 'nullable|string|max:100',
