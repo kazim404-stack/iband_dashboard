@@ -114,23 +114,17 @@ class HomeApiController extends Controller
     {
         $lang = $request->query('lang', app()->getLocale());
 
-
         $currencyCode = session('currency_code', 'USD');
-
 
         $selectedCurrency = \App\Models\Currency::where('code', $currencyCode)->first();
         $defaultCurrency  = \App\Models\Currency::where('is_default', 1)->first();
-
 
         $defaultRate = $defaultCurrency ? $defaultCurrency->exchange_rate : 1.0;
         $selectedRate = $selectedCurrency ? $selectedCurrency->exchange_rate : 1.0;
 
         $exchangeRate = $selectedRate / $defaultRate;
 
-        $products = Product::whereHas('productVariants.stocks', function ($q) {
-            $q->where('qty', '>', 0);
-        })
-            ->where('status', 1)
+        $products = Product::where('status', 1)
             ->with([
                 'category',
                 'productImages',
@@ -138,7 +132,12 @@ class HomeApiController extends Controller
                 'productVariants.stocks.currency'
             ])
             ->get();
+
         $data = $products->map(function ($product) use ($lang, $exchangeRate, $selectedCurrency) {
+            $totalStockQty = $product->productVariants->flatMap(fn($v) => $v->stocks)->sum('qty');
+
+            $productStockStatus = $totalStockQty > 0 ? 'in_stock' : 'out_of_stock';
+
             return [
                 'id' => $product->id,
                 'name' => $product->getTranslation('name', $lang),
@@ -153,6 +152,7 @@ class HomeApiController extends Controller
                     'height' => $product->height,
                 ],
                 'status' => $product->status,
+                'stock_status' => $productStockStatus,
                 'category' => $product->category ? [
                     'id' => $product->category->id,
                     'name' => $product->category->getTranslation('name', $lang),
@@ -203,10 +203,10 @@ class HomeApiController extends Controller
             'data' => $data
         ]);
     }
+
     public function productFilterByCatId(Request $request, $categoryId)
     {
         $lang = $request->query('lang', app()->getLocale());
-
 
         $currencyCode = session('currency_code', 'USD');
 
@@ -220,9 +220,6 @@ class HomeApiController extends Controller
         $category = Category::with([
             'products' => function ($query) {
                 $query->where('status', 1)
-                    ->whereHas('productVariants.stocks', function ($q) {
-                        $q->where('qty', '>', 0);
-                    })
                     ->with([
                         'productImages',
                         'productVariants.attributeValues.attribute',
@@ -234,7 +231,7 @@ class HomeApiController extends Controller
         if (!$category || $category->products->isEmpty()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'No products with stock found for this category'
+                'message' => 'No products found for this category'
             ], 404);
         }
 
@@ -242,6 +239,11 @@ class HomeApiController extends Controller
             'id' => $category->id,
             'name' => $category->getTranslation('name', $lang),
             'products' => $category->products->map(function ($product) use ($lang, $exchangeRate, $selectedCurrency) {
+
+
+                $totalStockQty = $product->productVariants->flatMap(fn($v) => $v->stocks)->sum('qty');
+                $productStockStatus = $totalStockQty > 0 ? 'in_stock' : 'out_of_stock';
+
                 return [
                     'id' => $product->id,
                     'name' => $product->getTranslation('name', $lang),
@@ -256,6 +258,7 @@ class HomeApiController extends Controller
                         'height' => $product->height,
                     ],
                     'status' => $product->status,
+                    'stock_status' => $productStockStatus, // ✅ وضعیت کلی محصول
                     'product_images' => $product->productImages->map(fn($image) => [
                         'id' => $image->id,
                         'image' => $image->image,
