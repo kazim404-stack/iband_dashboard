@@ -132,7 +132,6 @@ class HomeApiController extends Controller
                 'productVariants.stocks.currency'
             ])
             ->get();
-
         $data = $products->map(function ($product) use ($lang, $exchangeRate, $selectedCurrency) {
             $totalStockQty = $product->productVariants->flatMap(fn($v) => $v->stocks)->sum('qty');
 
