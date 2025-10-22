@@ -182,16 +182,11 @@ class HomeApiController extends Controller
                         ],
                         'qty' => $stockQty,
                         'stock_status' => $stockStatus,
-                        'attribute_values' => $variant->attributeValues->map(function ($value) use ($lang) {
-                            return [
-                                'id' => $value->id,
-                                'value' => $value->getTranslation('value', $lang),
-                                'attribute' => [
-                                    'id' => $value->attribute->id,
-                                    'name' => $value->attribute->getTranslation('name', $lang),
-                                ],
-                            ];
-                        }),
+                        'attribute_values' => $variant->attributeValues
+                            ->groupBy(fn($value) => $value->attribute->getTranslation('name', $lang))
+                            ->map(function ($group) use ($lang) {
+                                return $group->map(fn($value) => $value->getTranslation('value', $lang))->values();
+                            }),
                     ];
                 }),
             ];
@@ -284,16 +279,11 @@ class HomeApiController extends Controller
                             ],
                             'qty' => $stockQty,
                             'stock_status' => $stockStatus,
-                            'attribute_values' => $variant->attributeValues->map(function ($value) use ($lang) {
-                                return [
-                                    'id' => $value->id,
-                                    'value' => $value->getTranslation('value', $lang),
-                                    'attribute' => [
-                                        'id' => $value->attribute->id,
-                                        'name' => $value->attribute->getTranslation('name', $lang),
-                                    ],
-                                ];
-                            }),
+                            'attribute_values' => $variant->attributeValues
+                                ->groupBy(fn($value) => $value->attribute->getTranslation('name', $lang))
+                                ->map(function ($group) use ($lang) {
+                                    return $group->map(fn($value) => $value->getTranslation('value', $lang))->values();
+                                }),
                         ];
                     }),
                 ];
