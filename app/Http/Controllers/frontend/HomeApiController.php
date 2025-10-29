@@ -115,13 +115,11 @@ class HomeApiController extends Controller
         $lang = $request->query('lang', app()->getLocale());
 
         $currencyCode = session('currency_code', 'USD');
-
         $selectedCurrency = \App\Models\Currency::where('code', $currencyCode)->first();
         $defaultCurrency  = \App\Models\Currency::where('is_default', 1)->first();
 
         $defaultRate = $defaultCurrency ? $defaultCurrency->exchange_rate : 1.0;
         $selectedRate = $selectedCurrency ? $selectedCurrency->exchange_rate : 1.0;
-
         $exchangeRate = $selectedRate / $defaultRate;
 
         $products = Product::where('status', 1)
@@ -132,9 +130,9 @@ class HomeApiController extends Controller
                 'productVariants.stocks.currency'
             ])
             ->get();
+
         $data = $products->map(function ($product) use ($lang, $exchangeRate, $selectedCurrency) {
             $totalStockQty = $product->productVariants->flatMap(fn($v) => $v->stocks)->sum('qty');
-
             $productStockStatus = $totalStockQty > 0 ? 'in_stock' : 'out_of_stock';
 
             return [
@@ -192,11 +190,15 @@ class HomeApiController extends Controller
             ];
         });
 
+
+        $groupedData = $data->groupBy(fn($item) => $item['category']['name'] ?? 'Uncategorized');
+
         return response()->json([
             'status' => 'success',
-            'data' => $data
+            'data' => $groupedData
         ]);
     }
+
 
     public function productFilterByCatId(Request $request, $categoryId)
     {
@@ -252,7 +254,7 @@ class HomeApiController extends Controller
                         'height' => $product->height,
                     ],
                     'status' => $product->status,
-                    'stock_status' => $productStockStatus, // ✅ وضعیت کلی محصول
+                    'stock_status' => $productStockStatus,
                     'product_images' => $product->productImages->map(fn($image) => [
                         'id' => $image->id,
                         'image' => $image->image,
@@ -294,5 +296,99 @@ class HomeApiController extends Controller
             'status' => 'success',
             'data' => $categoryData
         ], 200);
+    }
+    // product details
+    public function productDetails(Request $request,$productId)
+    {
+        $lang = $request->query('lang', app()->getLocale());
+        $currencyCode = session('currency_code', 'USD');
+        $selectedCurrency = \App\Models\Currency::where('code', $currencyCode)->first();
+        $defaultCurrency  = \App\Models\Currency::where('is_default', 1)->first();
+
+        $defaultRate = $defaultCurrency ? $defaultCurrency->exchange_rate : 1.0;
+        $selectedRate = $selectedCurrency ? $selectedCurrency->exchange_rate : 1.0;
+        $exchangeRate = $selectedRate / $defaultRate;
+
+
+        $query = Product::where('status', 1)
+            ->with([
+                'category',
+                'productImages',
+                'productVariants.attributeValues.attribute',
+                'productVariants.stocks.currency'
+            ]);
+
+        if ($productId) {
+            $query->where('id', $productId);
+        }
+
+        $products = $query->get();
+
+        $data = $products->map(function ($product) use ($lang, $exchangeRate, $selectedCurrency) {
+            $totalStockQty = $product->productVariants->flatMap(fn($v) => $v->stocks)->sum('qty');
+            $productStockStatus = $totalStockQty > 0 ? 'in_stock' : 'out_of_stock';
+
+            return [
+                'id' => $product->id,
+                'name' => $product->getTranslation('name', $lang),
+                'short_description' => $product->getTranslation('short_description', $lang),
+                'long_description' => $product->getTranslation('long_description', $lang),
+                'sku' => $product->sku,
+                'type' => $product->type,
+                'weight' => $product->weight,
+                'dimensions' => [
+                    'length' => $product->length,
+                    'width' => $product->width,
+                    'height' => $product->height,
+                ],
+                'status' => $product->status,
+                'stock_status' => $productStockStatus,
+                'category' => $product->category ? [
+                    'id' => $product->category->id,
+                    'name' => $product->category->getTranslation('name', $lang),
+                ] : null,
+                'product_images' => $product->productImages->map(fn($image) => [
+                    'id' => $image->id,
+                    'image' => $image->image,
+                ]),
+                'product_variants' => $product->productVariants->map(function ($variant) use ($lang, $exchangeRate, $selectedCurrency) {
+
+                    $convertedPrice = $variant->price * $exchangeRate;
+                    $convertedComparePrice = $variant->compare_price ? $variant->compare_price * $exchangeRate : null;
+                    $convertedCostPrice = $variant->cost_price ? $variant->cost_price * $exchangeRate : null;
+
+                    $stockQty = $variant->stocks->sum('qty');
+                    $stockStatus = $stockQty > 0 ? 'in_stock' : 'out_of_stock';
+
+                    return [
+                        'id' => $variant->id,
+                        'sku' => $variant->sku,
+                        'barcode' => $variant->barcode,
+                        'price' => round($convertedPrice, 2),
+                        'compare_price' => $convertedComparePrice ? round($convertedComparePrice, 2) : null,
+                        'cost_price' => $convertedCostPrice ? round($convertedCostPrice, 2) : null,
+                        'currency' => [
+                            'code' => $selectedCurrency ? $selectedCurrency->code : 'USD',
+                            'symbol' => $selectedCurrency ? $selectedCurrency->symbol : '$',
+                        ],
+                        'qty' => $stockQty,
+                        'stock_status' => $stockStatus,
+                        'attribute_values' => $variant->attributeValues
+                            ->groupBy(fn($value) => $value->attribute->id)
+                            ->map(function ($group) use ($lang) {
+                                return $group->map(fn($value) => $value->getTranslation('value', $lang))->values();
+                            }),
+                    ];
+                }),
+            ];
+        });
+        if (!$productId) {
+            $data = $data->groupBy(fn($item) => $item['category']['name'] ?? 'Uncategorized');
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $productId ? $data->first() : $data, // return single product when filtered
+        ]);
     }
 }

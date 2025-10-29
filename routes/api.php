@@ -17,6 +17,7 @@ Route::middleware(['web', LocalizationMiddleware::class])->group(function () {
     Route::get('category', [HomeApiController::class, 'category'])->name('home.category');
     Route::get('product', [HomeApiController::class, 'product'])->name('home.product');
     Route::get('product/{category_id}', [HomeApiController::class, 'productFilterByCatId'])->name('home.productFilterByCatId');
+    Route::get('product_details/{product_id}', [HomeApiController::class, 'productDetails'])->name('home.productDetails');
 
     Route::get('set-currency', [HomeApiController::class, 'setCurrency'])->name('home.set.currency');
     Route::get('get-currency', [HomeApiController::class, 'getCurrency'])->name('home.get.currency');
