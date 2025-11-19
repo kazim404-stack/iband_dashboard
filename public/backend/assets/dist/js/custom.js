@@ -1964,6 +1964,138 @@ $(document).ready(function () {
             }
         })
     });
+    // store coupon
+    $(document).on('click', '#store-coupon', function (e) {
+        e.preventDefault();
+        let form = $('#create-coupon-form');
+        let data = new FormData(form[0]);
+        let btn = $(this);
+        let getUrl = form.attr('action');
+        let modal = $('#create-coupon');
+        btn.prop('disabled', true);
+        $.ajax({
+            url: getUrl,
+            type: 'post',
+            processData: false,
+            contentType: false,
+            data: data,
+            success: function (response) {
+                if (response.status == "success") {
+                    btn.prop('disabled', false);
+                    form[0].reset();
+                    modal.modal('hide');
+                    toastr.success(response.message);
+                    $("#coupons-table").DataTable().ajax.reload(null, false);
+                }
+
+            }, error: function (xhr) {
+                btn.prop('disabled', false);
+
+                if (xhr.status === 422) {
+                    modal.modal('show');
+                    $('.text-danger').remove(); // Clear all old error messages
+
+                    let errors = xhr.responseJSON.errors;
+
+                    $.each(errors, function (key, value) {
+                        let fieldName;
+
+                        // Convert dot notation to array format: address.en => address[en]
+                        if (key.includes('.')) {
+                            const parts = key.split('.');
+                            fieldName = parts.shift() + '[' + parts.join('][') + ']';
+                        } else {
+                            fieldName = key;
+                        }
+
+                        // Select by name attribute
+
+                        const inputField = $(`#create-coupon-form [name="${fieldName}"]`);
+
+                        if (inputField.length > 0) {
+                            inputField.next('.text-danger').remove();
+                            inputField.after(`<p class="text-danger">${value[0]}</p>`);
+                        } else {
+                            console.warn('Field not found:', fieldName);
+                        }
+                    });
+                }
+            }
+        });
+    });
+    // edit stock
+        $(document).on('click', '.edit-coupon-btn', function (e) {
+        e.preventDefault();
+        let getUrl = $(this).attr("href");
+        $.ajax({
+            url: getUrl,
+            type: 'get',
+            success: function (response) {
+                if (response.status == "success") {
+                    $("#edit-coupon-form [name='name']").val(response.data.name);
+                    $("#edit-coupon-form [name='discount']").val(response.data.discount);
+                    $("#edit-coupon-form [name='valid_until']").val(response.data.valid_until);
+                    let actionUrl = `coupons/${response.data.id}`;
+                    $("#edit-coupon-form").attr('action', actionUrl);
+                }
+            },
+            error: function (xhr) {
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    toastr.error(xhr.responseJSON.message);
+                } else {
+                    toastr.error("An unexpected error occurred.");
+                }
+            }
+        });
+    });
+    // Update coupon
+        $(document).on('click', '#update-coupon', function (e) {
+        e.preventDefault();
+        let form = $('#edit-coupon-form');
+        let getUrl = form.attr('action');
+        let data = new FormData(form[0]);
+        data.append('_method', 'PUT');
+        let modal = $('#edit-coupon');
+        $.ajax({
+            url: getUrl,
+            type: 'post',
+            data: data,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.status == "success") {
+                    toastr.success(response.message);
+                    $('#coupons-table').DataTable().ajax.reload(null, false);
+                    modal.modal('hide');
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    modal.modal('show');
+                    $('.text-danger').remove();
+                    let errors = xhr.responseJSON.errors;
+                    $.each(errors, function (key, value) {
+                        let fieldName;
+                        // Convert dot notation to array format: address.en => address[en]
+                        if (key.includes('.')) {
+                            const parts = key.split('.');
+                            fieldName = parts.shift() + '[' + parts.join('][') + ']';
+                        } else {
+                            fieldName = key;
+                        }
+                        const inputField = $(`#edit-coupon-form [name="${fieldName}"]`);
+                        if (inputField.length > 0) {
+                            inputField.next('.text-danger').remove();
+                            inputField.after(`<p class="text-danger">${value[0]}</p>`);
+                        } else {
+                            console.warn('Field not found:', fieldName);
+                        }
+                    });
+                }
+            }
+        })
+    });
+
 
 
 

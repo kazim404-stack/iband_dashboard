@@ -4,6 +4,7 @@ use App\Http\Controllers\backend\AttributeController;
 use App\Http\Controllers\backend\AttributeValueController;
 use App\Http\Controllers\backend\CategoryController;
 use App\Http\Controllers\backend\ContactController;
+use App\Http\Controllers\backend\CouponController;
 use App\Http\Controllers\backend\CurrencyController;
 use App\Http\Controllers\backend\GeneralController;
 use App\Http\Controllers\backend\GeneralSettingController;
@@ -63,7 +64,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::resource('product-variants', ProductVariantController::class);
     Route::resource('currencies', CurrencyController::class);
     Route::resource('stock', StockControllre::class);
-
+    Route::resource('coupons', CouponController::class);
 });
 
 require __DIR__ . '/auth.php';

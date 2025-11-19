@@ -121,7 +121,6 @@ class HomeApiController extends Controller
         $defaultRate = $defaultCurrency ? $defaultCurrency->exchange_rate : 1.0;
         $selectedRate = $selectedCurrency ? $selectedCurrency->exchange_rate : 1.0;
         $exchangeRate = $selectedRate / $defaultRate;
-
         $products = Product::where('status', 1)
             ->with([
                 'category',
@@ -130,7 +129,6 @@ class HomeApiController extends Controller
                 'productVariants.stocks.currency'
             ])
             ->get();
-
         $data = $products->map(function ($product) use ($lang, $exchangeRate, $selectedCurrency) {
             $totalStockQty = $product->productVariants->flatMap(fn($v) => $v->stocks)->sum('qty');
             $productStockStatus = $totalStockQty > 0 ? 'in_stock' : 'out_of_stock';
@@ -189,17 +187,12 @@ class HomeApiController extends Controller
                 }),
             ];
         });
-
-
         $groupedData = $data->groupBy(fn($item) => $item['category']['name'] ?? 'Uncategorized');
-
         return response()->json([
             'status' => 'success',
             'data' => $groupedData
         ]);
     }
-
-
     public function productFilterByCatId(Request $request, $categoryId)
     {
         $lang = $request->query('lang', app()->getLocale());
