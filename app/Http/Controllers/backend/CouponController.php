@@ -56,7 +56,6 @@ class CouponController extends Controller
         $coupon = Coupon::findOrFail($id);
         return response()->json(['data' => $coupon, 'status' => 'success']);
     }
-
     /**
      * Update the specified resource in storage.
      */
