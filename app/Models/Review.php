@@ -9,7 +9,7 @@ class Review extends Model
 {
     protected $fillable = [
         'user_id',
-        'product_id',
+        'product_variant_id',
         'title',
         'body',
         'rating',
@@ -19,12 +19,12 @@ class Review extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function product()
+    public function productVariant()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(ProductVariant::class);
     }
     public function getCreatedAtAttribute($value)
     {
-        return Carbon::parse($value)->diffForHumans();
+        return Carbon::parse($this->attributes['created_at'])->diffForHumans();
     }
 }

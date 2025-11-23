@@ -10,14 +10,14 @@ class ReviewController extends Controller
 {
     public function store(Request $request)
     {
-        $exists = $this->checkIfUserAlreadyReviewedTheProduct($request->product_id, $request->user()->id);
+        $exists = $this->checkIfUserAlreadyReviewedTheProduct($request->product_variant_id, $request->user()->id);
         if ($exists) {
             return response()->json([
                 "error" => "You have already reviewed this product"
             ]);
         } else {
             Review::create([
-                'product_id' => $request->product_id,
+                'product_variant_id' => $request->product_variant_id,
                 'user_id' => $request->user()->id,
                 'title' => $request->title,
                 'body' => $request->body,
@@ -30,10 +30,10 @@ class ReviewController extends Controller
     }
     public function update(Request $request)
     {
-        $review = $this->checkIfUserAlreadyReviewedTheProduct($request->product_id, $request->user()->id);
+        $review = $this->checkIfUserAlreadyReviewedTheProduct($request->product_variant_id, $request->user()->id);
         if ($review) {
             $review->update([
-                'product_id' => $request->product_id,
+                'product_variant_id' => $request->product_variant_id,
                 'user_id' => $request->user()->id,
                 'title' => $request->title,
                 'body' => $request->body,
@@ -48,17 +48,17 @@ class ReviewController extends Controller
         }
     }
 
-    public function checkIfUserAlreadyReviewedTheProduct($product_id, $user_id)
+    public function checkIfUserAlreadyReviewedTheProduct($product_variant_id, $user_id)
     {
         $review = Review::where([
-            'product_id' => $product_id,
+            'product_variant_id' => $product_variant_id,
             'user_id' => $user_id
         ])->first();
         return $review;
     }
     public function delete(Request $request)
     {
-        $review = $this->checkIfUserAlreadyReviewedTheProduct($request->product_id, $request->user()->id);
+        $review = $this->checkIfUserAlreadyReviewedTheProduct($request->product_variant_id, $request->user()->id);
         if ($review) {
             $review->delete();
             return response()->json([
