@@ -22,4 +22,7 @@ class Coupon extends Model
             return false;
         }
     }
+    public function orders(){
+        return $this->hasMany(Order::class);
+    }
 }

@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('coupon_id')->nullable();
+
+            $table->decimal('total_price', 10, 2)->default(0);
+
+            $table->dateTime('delivered_at')->nullable();
+            $table->boolean('status')->default(0);
             $table->timestamps();
         });
     }

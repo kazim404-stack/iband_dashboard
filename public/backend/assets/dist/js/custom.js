@@ -2024,7 +2024,7 @@ $(document).ready(function () {
         });
     });
     // edit stock
-        $(document).on('click', '.edit-coupon-btn', function (e) {
+    $(document).on('click', '.edit-coupon-btn', function (e) {
         e.preventDefault();
         let getUrl = $(this).attr("href");
         $.ajax({
@@ -2049,7 +2049,7 @@ $(document).ready(function () {
         });
     });
     // Update coupon
-        $(document).on('click', '#update-coupon', function (e) {
+    $(document).on('click', '#update-coupon', function (e) {
         e.preventDefault();
         let form = $('#edit-coupon-form');
         let getUrl = form.attr('action');
@@ -2095,6 +2095,28 @@ $(document).ready(function () {
             }
         })
     });
+    // update delivered_at
+    $(document).on('click', '#updateDeliveredAtDate', function (e) {
+        e.preventDefault();
+        let url = $(this).attr('href');
+        $.ajax({
+            url: url,
+            type: 'get',
+            success: function (response) {
+                if (response.status == "success") {
+                    $('#orders-table').DataTable().ajax.reload(null, false);
+                    toastr.success(response.message);
+                }
+            },
+            error: function (xhr) {
+                console.log(xhr);
+
+            }
+        });
+
+
+
+    })
 
 
 

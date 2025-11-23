@@ -3,6 +3,7 @@
 use App\Http\Controllers\backend\GeneralController;
 use App\Http\Controllers\frontend\AuthController;
 use App\Http\Controllers\frontend\HomeApiController;
+use App\Http\Controllers\frontend\OrderController;
 use App\Http\Middleware\LocalizationMiddleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ use Illuminate\Http\Request;
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('order/store', [OrderController::class, 'store'])->name('order.store');
 });
 
 Route::middleware(['web', LocalizationMiddleware::class])->group(function () {

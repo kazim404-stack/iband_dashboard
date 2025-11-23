@@ -9,6 +9,7 @@ use App\Http\Controllers\backend\CurrencyController;
 use App\Http\Controllers\backend\GeneralController;
 use App\Http\Controllers\backend\GeneralSettingController;
 use App\Http\Controllers\backend\LoadParentCategoryController;
+use App\Http\Controllers\backend\OrderController;
 use App\Http\Controllers\backend\PhoneController;
 use App\Http\Controllers\backend\ProductController;
 use App\Http\Controllers\backend\ProductImageController;
@@ -61,6 +62,9 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::resource('currencies', CurrencyController::class);
     Route::resource('stock', StockControllre::class);
     Route::resource('coupons', CouponController::class);
+    Route::get('orders',[OrderController::class,'index'])->name('orders.index');
+    Route::get('orders/{order}/order',[OrderController::class,'updateDeliveredAtDate'])->name('orders.updateDeliveredAtDate');
+    Route::delete('orders/{order}/order',[OrderController::class,'delete'])->name('orders.delete');
 });
 
 

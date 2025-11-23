@@ -190,8 +190,11 @@
                                         <a class="dropdown-item" href="{{ route('admin.stock.index') }}">
                                             Stock
                                         </a>
-                                            <a class="dropdown-item" href="{{ route('admin.coupons.index') }}">
+                                        <a class="dropdown-item" href="{{ route('admin.coupons.index') }}">
                                             Coupon
+                                        </a>
+                                        <a class="dropdown-item" href="{{ route('admin.orders.index') }}">
+                                            Orders
                                         </a>
                                     </div>
                                 </div>
