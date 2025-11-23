@@ -5,6 +5,7 @@ use App\Http\Controllers\frontend\AuthController;
 use App\Http\Controllers\frontend\CouponController;
 use App\Http\Controllers\frontend\HomeApiController;
 use App\Http\Controllers\frontend\OrderController;
+use App\Http\Controllers\frontend\ReviewController;
 use App\Http\Middleware\LocalizationMiddleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -19,8 +20,14 @@ use Illuminate\Http\Request;
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    // Order routes
     Route::post('order/store', [OrderController::class, 'store'])->name('order.store');
+    // coupon routes
     Route::post('coupon/apply', [CouponController::class, 'applyCoupon'])->name('coupon.apply');
+    // Review routes
+    Route::post('review/store', [ReviewController::class, 'store'])->name('review.store');
+    Route::put('review/update', [ReviewController::class, 'update'])->name('review.update');
+    Route::post('review/delete', [ReviewController::class, 'delete'])->name('review.delete');
 });
 
 Route::middleware(['web', LocalizationMiddleware::class])->group(function () {
