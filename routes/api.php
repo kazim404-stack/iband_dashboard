@@ -7,6 +7,7 @@ use App\Http\Controllers\frontend\HomeApiController;
 use App\Http\Controllers\frontend\OrderController;
 use App\Http\Controllers\frontend\ReviewController;
 use App\Http\Middleware\LocalizationMiddleware;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -18,6 +19,8 @@ use Illuminate\Http\Request;
 //     Route::get('product/{category_id}', [HomeApiController::class, 'productFilterByCatId'])->name('home.productFilterByCatId');
 // });
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('user/orders', [OrderController::class, 'userOrders']);
+
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/logout', [AuthController::class, 'logout']);
     // Order routes

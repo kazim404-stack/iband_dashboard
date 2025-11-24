@@ -39,7 +39,6 @@ class ProductVariant extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class)
-            ->with('user')
             ->where('approved', 1)
             ->latest();
     }
