@@ -196,13 +196,16 @@
                                         <a class="dropdown-item" href="{{ route('admin.orders.index') }}">
                                             Orders
                                         </a>
+                                        <a class="dropdown-item" href="{{ route('admin.reviews.index') }}">
+                                            Reviews
+                                        </a>
                                     </div>
                                 </div>
                             </div>
 
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="./form-elements.html">
+                            <a class="nav-link" href="{{ route('admin.users.index') }}">
                                 <span
                                     class="nav-link-icon d-md-none d-lg-inline-block"><!-- Download SVG icon from http://tabler-icons.io/i/checkbox -->
                                     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
@@ -214,7 +217,7 @@
                                     </svg>
                                 </span>
                                 <span class="nav-link-title">
-                                    Form elements
+                                    Users
                                 </span>
                             </a>
                         </li>

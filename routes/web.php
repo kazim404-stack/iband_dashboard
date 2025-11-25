@@ -14,9 +14,11 @@ use App\Http\Controllers\backend\PhoneController;
 use App\Http\Controllers\backend\ProductController;
 use App\Http\Controllers\backend\ProductImageController;
 use App\Http\Controllers\backend\ProductVariantController;
+use App\Http\Controllers\backend\ReviewController;
 use App\Http\Controllers\backend\SliderController;
 use App\Http\Controllers\backend\SliderImageController;
 use App\Http\Controllers\backend\StockControllre;
+use App\Http\Controllers\backend\UserController;
 use App\Http\Controllers\LoadCategoryToProductController;
 use App\Http\Controllers\ProfileController;
 use App\Models\AttributeValue;
@@ -62,9 +64,15 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::resource('currencies', CurrencyController::class);
     Route::resource('stock', StockControllre::class);
     Route::resource('coupons', CouponController::class);
-    Route::get('orders',[OrderController::class,'index'])->name('orders.index');
-    Route::get('orders/{order}/order',[OrderController::class,'updateDeliveredAtDate'])->name('orders.updateDeliveredAtDate');
-    Route::delete('orders/{order}/order',[OrderController::class,'delete'])->name('orders.delete');
+    // route orders
+    Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/{order}/order', [OrderController::class, 'updateDeliveredAtDate'])->name('orders.updateDeliveredAtDate');
+    Route::delete('orders/{order}/order', [OrderController::class, 'delete'])->name('orders.delete');
+    // route reviews
+    Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
+    Route::get('reviews/{review}/{status}', [ReviewController::class, 'toggleReviewStatus'])->name('reviews.toggleReviewStatus');
+    Route::delete('reviews/{review}', [ReviewController::class, 'delete'])->name('reviews.delete');
+    // users
+    Route::get('users/index', [UserController::class, 'index'])->name('users.index');
+    Route::delete('users/{user}', [UserController::class, 'delete'])->name('users.delete');
 });
-
-

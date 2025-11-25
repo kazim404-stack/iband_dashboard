@@ -83,7 +83,7 @@ class AuthController extends Controller
                 'country' => $request->country,
                 'city' => $request->city,
                 'address' => $request->address,
-                'zip_code' => $request->zipe_code,
+                'zip_code' => $request->zip_code,
                 'phone_number' => $request->phone_number,
                 'profile_completed' => 1,
             ]);

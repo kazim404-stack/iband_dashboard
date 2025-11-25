@@ -2114,9 +2114,28 @@ $(document).ready(function () {
             }
         });
 
+    })
+    // Update review approved toggleReviewStatus
+    $(document).on('click', '.toggleReviewStatus', function (e) {
+        e.preventDefault();
+        let url = $(this).attr('href');
+        $.ajax({
+            url: url,
+            type: 'get',
+            success: function (response) {
+                if (response.status == "success") {
+                    $('#reviews-table').DataTable().ajax.reload(null, false);
+                    toastr.success(response.message);
+                }
+            },
+            error: function (xhr) {
+                console.log(xhr);
 
+            }
+        });
 
     })
+
 
 
 
