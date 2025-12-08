@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\backend\AdminController;
+use App\Http\Controllers\backend\AdminForgotPasswordController;
+use App\Http\Controllers\backend\AdminResetPasswordController;
 use App\Http\Controllers\backend\AttributeController;
 use App\Http\Controllers\backend\AttributeValueController;
 use App\Http\Controllers\backend\CategoryController;
@@ -21,6 +24,7 @@ use App\Http\Controllers\backend\StockControllre;
 use App\Http\Controllers\backend\UserController;
 use App\Http\Controllers\LoadCategoryToProductController;
 use App\Http\Controllers\ProfileController;
+
 use App\Models\AttributeValue;
 use App\Models\GeneralSetting;
 use Illuminate\Support\Facades\Route;
@@ -33,21 +37,56 @@ use Illuminate\Support\Facades\Route;
 // Route::get('/set-currency', [GeneralController::class, 'setCurrency'])->name('set.currency');
 
 
+Route::get('/', [AdminController::class, 'login'])->name('admin.login');
+Route::post('admin/auth', [AdminController::class, 'auth'])->name('admin.auth');
 
-Route::get('/', function () {
-    return view('admin.dashboard.dashboard');
-})->name('da');
+// Reset password route
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+
+    // Forgot password form
+    Route::get('forgot-password', [AdminForgotPasswordController::class, 'showLinkRequestForm'])
+        ->name('password.request');
+
+    // Send reset email
+    Route::post('forgot-password', [AdminForgotPasswordController::class, 'sendResetLinkEmail'])
+        ->name('password.email');
+
+    // Reset password form
+    Route::get('reset-password/{token}', [AdminResetPasswordController::class, 'showResetForm'])
+        ->name('password.reset');
+
+    // Update password
+    Route::post('reset-password', [AdminResetPasswordController::class, 'reset'])
+        ->name('password.update');
+
+
 
 
 
 
 
 // backend routes
-Route::prefix('admin')->as('admin.')->group(function () {
+Route::prefix('admin')->as('admin.')->middleware(['admin', 'CheckAdminStatus'])->group(function () {
+    // admin auth routes
+    Route::get('dashboard', [AdminController::class, 'index'])->name('dashboard');
+    Route::post('logout', [AdminController::class, 'logout'])->name('logout');
+    Route::get('/change-password', [AdminController::class, 'showChangePasswordForm'])->name('changePassword.create');
+    Route::post('/change-password', [AdminController::class, 'changePassword'])->name('changePassword.update');
+    Route::get('/change-profile', [AdminController::class, 'chageProfileForm'])->name('changeProfile.create');
+    Route::post('/change-profile', [AdminController::class, 'chageProfile'])->name('changeProfile.update');
+    // admin creae and delete routes
+    Route::get('admin/index', [AdminController::class, 'adminList'])->name('admin.list');
+    Route::get('admin/create', [AdminController::class, 'adminCreate'])->name('admin.create');
+    Route::post('admin/add', [AdminController::class, 'addAdmin'])->name('admin.add');
+    Route::delete('admin/delete/{id}', [AdminController::class, 'delete'])->name('admin.delete');
+    Route::get('admin/change/status', [AdminController::class, 'changeStatus'])->name('admin.changeStatus');
+
+
+
+
+
+
+
     Route::resource('general-settings', GeneralSettingController::class);
     Route::resource('contacts', ContactController::class);
     Route::resource('phones', PhoneController::class);

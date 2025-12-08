@@ -36,27 +36,7 @@ $(document).ready(function () {
             }
         });
     });
-    $(document).on('click', '.change_status', function () {
-        let getId = $(this).data('id');
-        let getUrl = $(this).data('url');
-        let isChecked = $(this).is(':checked');
-        $.ajax({
-            url: getUrl,
-            type: 'get',
-            data: {
-                id: getId,
-                status: isChecked
-            },
-            success: function (response) {
-                if (response['status'] == "success") {
-                    toastr.success("status changed successfully");
-                }
-            },
-            error: function () {
-                toastr.error("warning");
-            }
-        });
-    });
+
     // store general setting
     $(document).on('click', '#store-general-setting', function (e) {
         e.preventDefault();
@@ -2134,7 +2114,29 @@ $(document).ready(function () {
             }
         });
 
-    })
+    });
+    // admin status
+        $(document).on('click', '.change_status', function () {
+        let getId = $(this).data('id');
+        let getUrl = $(this).data('url');
+        let isChecked = $(this).is(':checked');
+        $.ajax({
+            url: getUrl,
+            type: 'get',
+            data: {
+                id: getId,
+                status: isChecked
+            },
+            success: function (response) {
+                if (response['status'] == "success") {
+                    toastr.success(response.message);
+                }
+            },
+            error: function () {
+                toastr.error("warning");
+            }
+        });
+    });
 
 
 

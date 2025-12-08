@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\CheckAdminStatus;
 use App\Http\Middleware\LocalizationMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(LocalizationMiddleware::class);
+        $middleware->append(CheckAdminStatus::class);
+        $middleware->alias([
+            'admin' => AdminMiddleware::class,
+            'CheckAdminStatus' => CheckAdminStatus::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

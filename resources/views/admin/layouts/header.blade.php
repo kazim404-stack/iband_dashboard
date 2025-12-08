@@ -8,7 +8,7 @@
               <span class="navbar-toggler-icon"></span>
           </button>
           <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-              <a href="{{ route('dashboard') }}">
+              <a href="{{ route('admin.dashboard') }}">
                   <img src="{{ asset($generalSetting->logo ?? 'backend/assets/static/logo.svg') }}" width="110"
                       height="32" alt="Tabler" class="navbar-brand-image">
               </a>
@@ -42,20 +42,23 @@
               <div class="nav-item dropdown">
                   <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown"
                       aria-label="Open user menu">
-                      <span class="avatar avatar-sm"
-                          style="background-image: url({{ asset('backend/assets/static/avatars/000m.jpg') }})"></span>
+                      <span class="avatar avatar-sm" @php
+$admin = Auth::guard('admin')->user(); @endphp
+                          style="background-image: url({{ $admin->image ? asset($admin->image) : asset('backend/assets/images/logo.png') }}); background-size:cover"></span>
                       <div class="d-none d-xl-block ps-2">
-                          <div>Paweł Kuna</div>
-                          <div class="mt-1 small text-secondary">UI Designer</div>
+                          <div>{{ $admin->name }}</div>
                       </div>
                   </a>
                   <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                      <a href="#" class="dropdown-item">Status</a>
-                      <a href="./profile.html" class="dropdown-item">Profile</a>
-                      <a href="#" class="dropdown-item">Feedback</a>
+                      <a href="{{ route('admin.changePassword.create') }}" class="dropdown-item">Change password</a>
+                      <a href="{{ route('admin.changeProfile.create') }}" class="dropdown-item">Profile</a>
+                      <a href="{{ route('admin.admin.list') }}" class="dropdown-item">Admin list</a>
                       <div class="dropdown-divider"></div>
-                      <a href="./settings.html" class="dropdown-item">Settings</a>
-                      <a href="./sign-in.html" class="dropdown-item">Logout</a>
+                      <a href="#" class="dropdown-item"
+                          onclick="document.getElementById('adminLogoutForm').submit()">Logout</a>
+                      <form id="adminLogoutForm" action="{{ route('admin.logout') }}" method="post">
+                          @csrf
+                      </form>
                   </div>
               </div>
           </div>
