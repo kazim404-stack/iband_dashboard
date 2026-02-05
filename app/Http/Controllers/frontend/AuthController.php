@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\frontend;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -14,7 +14,7 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:6',
         ]);
 
         $user = User::create([
@@ -27,39 +27,43 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $user,
-            'access_token' => $token
+            'token' => $token,
         ], 201);
     }
+
     public function login(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string',
+            'password' => 'required',
         ]);
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['error' => 'Invalid credentials'], 401);
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        $token = $user->createToken('api_token')->plainTextToken;
+        // Create token for API
+        $token = $user->createToken('token')->plainTextToken;
 
         return response()->json([
             'user' => $user,
-            'access_token' => $token
+            'token' => $token,
         ]);
     }
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
+
         return response()->json(['message' => 'Logged out']);
     }
 
     public function profile(Request $request)
     {
         $request->validate([
-            'profile_image' => 'image|mimes:png,jpg,webp|max:2048'
+            'profile_image' => 'image|mimes:png,jpg,webp|max:2048',
         ]);
         $token = $request->user()->createToken('api_token')->plainTextToken;
         if ($request->hasFile('profile_image')) {
@@ -67,13 +71,14 @@ class AuthController extends Controller
                 unlink(public_path($request->user()->profile_image));
             }
             $image = $request->file('profile_image');
-            $imageName = uniqid() . '.' . $image->getClientOriginalExtension();
-            $imagePath = "backend/assets/images/users/" . $imageName;
-            $image->move(public_path("backend/assets/images/users/"), $imageName);
+            $imageName = uniqid().'.'.$image->getClientOriginalExtension();
+            $imagePath = 'backend/assets/images/users/'.$imageName;
+            $image->move(public_path('backend/assets/images/users/'), $imageName);
 
             $request->user()->update([
                 'profile_image' => $imagePath,
             ]);
+
             return response()->json([
                 'message' => 'profifle image updated successfully',
                 'access_token' => $token,
@@ -87,10 +92,16 @@ class AuthController extends Controller
                 'phone_number' => $request->phone_number,
                 'profile_completed' => 1,
             ]);
+
             return response()->json([
                 'message' => 'Profile has been updated successfully',
                 'access_token' => $token,
             ]);
         }
+    }
+
+    public function me()
+    {
+        return response()->json(auth()->user());
     }
 }

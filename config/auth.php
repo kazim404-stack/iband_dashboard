@@ -126,4 +126,9 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    'admin' => [
+        'driver' => 'session', // OR sanctum / jwt / token depending your app
+        'provider' => 'admins',
+    ],
+
 ];
